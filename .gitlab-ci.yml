@@ -1,0 +1,64 @@
+image: node:20-alpine
+
+stages:
+  - build
+  - deploy
+
+# Si votre projet est dans un sous-dossier, définissez son nom ici
+variables:
+  PROJECT_DIR: "frontend" # <--- METTEZ LE VRAI NOM DU DOSSIER ICI
+
+build_site:
+  stage: build
+  script:
+    - cd $PROJECT_DIR       # On rentre dans le dossier
+    - npm ci
+    - npm run generate
+  artifacts:
+    name: "build-files"
+    paths:
+      - $PROJECT_DIR/.output/public/ # On récupère le résultat au bon endroit
+    expire_in: 1 hour
+
+deploy_to_cloudflare:
+  stage: deploy
+  dependencies:
+    - build_site
+  script:
+    - npm install -g wrangler
+    # On reste à la racine pour lancer wrangler, mais on pointe vers le bon sous-dossier
+    - npx wrangler pages deploy $PROJECT_DIR/.output/public --project-name="ndi" --branch="$CI_COMMIT_REF_NAME" --commit-hash="$CI_COMMIT_SHA"
+  rules:
+    - if: $CLOUDFLARE_ACCOUNT_ID && $CLOUDFLARE_API_TOKEN
+image: node:20-alpine
+
+stages:
+  - build
+  - deploy
+
+# Si votre projet est dans un sous-dossier, définissez son nom ici
+variables:
+  PROJECT_DIR: "frontend" # <--- METTEZ LE VRAI NOM DU DOSSIER ICI
+
+build_site:
+  stage: build
+  script:
+    - cd $PROJECT_DIR      # On rentre dans le dossier
+    - npm install
+    - npm run generate
+  artifacts:
+    name: "build-files"
+    paths:
+      - $PROJECT_DIR/.output/public/ # On récupère le résultat au bon endroit
+    expire_in: 1 hour
+
+deploy_to_cloudflare:
+  stage: deploy
+  dependencies:
+    - build_site
+  script:
+    - npm install -g wrangler
+    # On reste à la racine pour lancer wrangler, mais on pointe vers le bon sous-dossier
+    - npx wrangler pages deploy $PROJECT_DIR/.output/public --project-name="ndi" --branch="$CI_COMMIT_REF_NAME" --commit-hash="$CI_COMMIT_SHA"
+  rules:
+    - if: $CLOUDFLARE_ACCOUNT_ID && $CLOUDFLARE_API_TOKEN

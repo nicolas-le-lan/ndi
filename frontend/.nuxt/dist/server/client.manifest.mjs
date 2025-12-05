@@ -1,0 +1,1 @@
+export { default } from "file:///C:/Users/woood/OneDrive/Documents/Fichiers_Louis/Cours/ESIEA/S7/CHALLENGES/NDI/nuitinfo/frontend/node_modules/@nuxt/vite-builder/dist/runtime/client.manifest.mjs"
